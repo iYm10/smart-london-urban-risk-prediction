@@ -49,11 +49,23 @@ st.markdown(
     }
 
     .stApp {
-        background: linear-gradient(180deg, #F8FBFD 0%, #EEF5F8 100%);
+        background:
+            radial-gradient(
+                circle at top right,
+                rgba(37, 194, 209, 0.10),
+                transparent 32%
+            ),
+            linear-gradient(
+                180deg,
+                #F8FBFD 0%,
+                #EEF5F8 58%,
+                #E7F0F5 100%
+            );
     }
 
-    /* Keep Streamlit header visible because it contains
-       the sidebar open/close control. Hide only menu and footer. */
+    /* Hide only Streamlit menu and footer.
+       Keep the header visible because it contains
+       the sidebar open/close button. */
     #MainMenu,
     footer {
         visibility: hidden;
@@ -61,18 +73,34 @@ st.markdown(
 
     header[data-testid="stHeader"] {
         visibility: visible !important;
-        background: transparent !important;
+        background: rgba(7, 26, 46, 0.96) !important;
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 6px 20px rgba(7, 26, 46, 0.12);
     }
 
-    /* Ensure the sidebar toggle button always stays visible. */
+    /* Make the sidebar toggle button visible and elegant */
     button[data-testid="stSidebarCollapsedControl"],
     [data-testid="stSidebarCollapseButton"],
-    [data-testid="collapsedControl"] {
+    button[kind="header"] {
         visibility: visible !important;
         display: flex !important;
         opacity: 1 !important;
         pointer-events: auto !important;
+        background: rgba(255,255,255,0.12) !important;
+        border: 1px solid rgba(255,255,255,0.16) !important;
+        border-radius: 10px !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.14) !important;
         z-index: 999999 !important;
+    }
+
+    button[data-testid="stSidebarCollapsedControl"]:hover,
+    [data-testid="stSidebarCollapseButton"]:hover,
+    button[kind="header"]:hover {
+        background: rgba(37,194,209,0.30) !important;
+        border-color: rgba(105,224,197,0.45) !important;
+        transform: translateY(-1px);
     }
 
     .block-container {
@@ -82,8 +110,20 @@ st.markdown(
     }
 
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, var(--navy) 0%, #09243D 100%);
+        background:
+            radial-gradient(
+                circle at top left,
+                rgba(37,194,209,0.12),
+                transparent 30%
+            ),
+            linear-gradient(
+                180deg,
+                #071A2E 0%,
+                #0A2944 55%,
+                #0D3655 100%
+            );
         border-right: 1px solid rgba(255,255,255,.08);
+        box-shadow: 8px 0 28px rgba(7,26,46,0.14);
     }
 
     [data-testid="stSidebar"] * {
