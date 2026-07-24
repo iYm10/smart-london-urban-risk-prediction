@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-import streamlit.components.v1 as components
 from xgboost import XGBRegressor
 
 
@@ -78,15 +77,6 @@ st.markdown(
     [data-testid="stSidebar"] .stDateInput label {
         color: #D7E8F2 !important;
         font-weight: 600;
-    }
-
-    /* Slider interaction must increase from left to right. */
-    [data-testid="stSidebar"] [data-testid="stSlider"],
-    [data-testid="stSidebar"] [data-baseweb="slider"],
-    [data-testid="stSidebar"] [data-baseweb="slider"] > div {
-        direction: ltr !important;
-        text-align: left !important;
-        unicode-bidi: isolate !important;
     }
 
     .brand-wrap {
@@ -731,97 +721,6 @@ with st.sidebar:
         "Run risk prediction",
         type="primary",
     )
-
-
-
-# =========================================================
-# Slider thumb position fix
-# =========================================================
-# Streamlit's filled track is correct, but in some RTL browser
-# environments the draggable thumb is mirrored. This script reads
-# aria-valuemin / aria-valuemax / aria-valuenow and positions the
-# thumb at the mathematically correct percentage during dragging.
-components.html(
-    """
-    <script>
-    const parentDoc = window.parent.document;
-
-    function fixSliderThumb(slider) {
-        const min = Number(slider.getAttribute("aria-valuemin"));
-        const max = Number(slider.getAttribute("aria-valuemax"));
-        const value = Number(slider.getAttribute("aria-valuenow"));
-
-        if (
-            Number.isNaN(min) ||
-            Number.isNaN(max) ||
-            Number.isNaN(value) ||
-            max === min
-        ) {
-            return;
-        }
-
-        const percentage = Math.max(
-            0,
-            Math.min(100, ((value - min) / (max - min)) * 100)
-        );
-
-        slider.style.setProperty(
-            "left",
-            percentage + "%",
-            "important"
-        );
-        slider.style.setProperty(
-            "right",
-            "auto",
-            "important"
-        );
-        slider.style.setProperty(
-            "transform",
-            "translateX(-50%)",
-            "important"
-        );
-        slider.style.setProperty(
-            "direction",
-            "ltr",
-            "important"
-        );
-    }
-
-    function fixAllSliders() {
-        const sliders = parentDoc.querySelectorAll(
-            '[data-testid="stSidebar"] [role="slider"]'
-        );
-
-        sliders.forEach(fixSliderThumb);
-    }
-
-    const observer = new MutationObserver(() => {
-        fixAllSliders();
-    });
-
-    observer.observe(parentDoc.body, {
-        attributes: true,
-        childList: true,
-        subtree: true,
-        attributeFilter: [
-            "aria-valuenow",
-            "style",
-            "class"
-        ]
-    });
-
-    parentDoc.documentElement.setAttribute("dir", "ltr");
-    parentDoc.body.setAttribute("dir", "ltr");
-
-    fixAllSliders();
-
-    // Recheck continuously while the user drags.
-    setInterval(fixAllSliders, 80);
-    </script>
-    """,
-    height=0,
-    width=0,
-)
 
 
 # =========================================================
