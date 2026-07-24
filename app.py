@@ -21,6 +21,19 @@ st.set_page_config(
 )
 
 
+# Set the application document direction before widgets are created.
+st.markdown(
+    """
+    <style>
+    html, body, #root, .stApp {
+        direction: ltr !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
 # =========================================================
 # Premium visual system
 # =========================================================
@@ -48,6 +61,44 @@ st.markdown(
         font-family: 'Inter', sans-serif;
     }
 
+    /* =====================================================
+       Definitive LTR fix for Streamlit / BaseWeb sliders
+       ===================================================== */
+    html,
+    body,
+    #root,
+    .stApp,
+    [data-testid="stApp"],
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"],
+    [data-testid="stSidebar"],
+    [data-testid="stSidebarContent"] {
+        direction: ltr !important;
+        unicode-bidi: isolate !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stSlider"],
+    [data-testid="stSidebar"] [data-baseweb="slider"],
+    [data-testid="stSidebar"] [data-baseweb="slider"] > div,
+    [data-testid="stSidebar"] [role="slider"] {
+        direction: ltr !important;
+        unicode-bidi: isolate !important;
+    }
+
+    /* Prevent inherited RTL transforms from reversing the thumb. */
+    [data-testid="stSidebar"] [role="slider"] {
+        transform-origin: center center !important;
+    }
+
+    /* Keep labels and displayed values aligned normally. */
+    [data-testid="stSidebar"] [data-testid="stSlider"] label,
+    [data-testid="stSidebar"] [data-testid="stSlider"] p,
+    [data-testid="stSidebar"] [data-testid="stSlider"] span {
+        direction: ltr !important;
+        unicode-bidi: isolate !important;
+        text-align: left !important;
+    }
+
     .stApp {
         background: linear-gradient(180deg, #F8FBFD 0%, #EEF5F8 100%);
     }
@@ -65,36 +116,10 @@ st.markdown(
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, var(--navy) 0%, #09243D 100%);
         border-right: 1px solid rgba(255,255,255,.08);
-        direction: ltr !important;
-    }
-
-    [data-testid="stSidebar"] > div,
-    [data-testid="stSidebar"] section,
-    [data-testid="stSidebar"] [data-testid="stSlider"],
-    [data-testid="stSidebar"] [data-baseweb="slider"] {
-        direction: ltr !important;
     }
 
     [data-testid="stSidebar"] * {
         color: #F4FBFF;
-    }
-
-    /* Keep the slider track, filled bar, thumb, and displayed value
-       in the same left-to-right coordinate system. */
-    [data-testid="stSidebar"] [data-testid="stSlider"] {
-        text-align: left !important;
-        unicode-bidi: isolate !important;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stSlider"] label,
-    [data-testid="stSidebar"] [data-testid="stSlider"] p,
-    [data-testid="stSidebar"] [data-testid="stSlider"] span {
-        direction: ltr !important;
-        unicode-bidi: isolate !important;
-    }
-
-    [data-testid="stSidebar"] [data-baseweb="slider"] > div {
-        direction: ltr !important;
     }
 
     [data-testid="stSidebar"] .stSlider label,
@@ -315,35 +340,6 @@ st.markdown(
         transform: translateY(-1px);
     }
     </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-
-# Force Streamlit's page direction to LTR so BaseWeb sliders calculate
-# the thumb and filled track from the same side.
-st.markdown(
-    """
-    <script>
-    const applyLTR = () => {
-        document.documentElement.setAttribute("dir", "ltr");
-        document.body.setAttribute("dir", "ltr");
-
-        const sidebar = document.querySelector(
-            '[data-testid="stSidebar"]'
-        );
-
-        if (sidebar) {
-            sidebar.setAttribute("dir", "ltr");
-            sidebar.style.direction = "ltr";
-        }
-    };
-
-    applyLTR();
-    setTimeout(applyLTR, 100);
-    setTimeout(applyLTR, 500);
-    </script>
     """,
     unsafe_allow_html=True,
 )
