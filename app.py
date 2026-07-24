@@ -96,6 +96,16 @@ st.markdown(
         unicode-bidi: isolate !important;
     }
 
+    [data-testid="stSidebar"] [data-testid="stNumberInput"] {
+        direction: ltr !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stNumberInput"] input {
+        direction: ltr !important;
+        text-align: left !important;
+        font-variant-numeric: tabular-nums;
+    }
+
     [data-testid="stSidebar"] [data-testid="stSlider"] label {
         direction: ltr !important;
         text-align: left !important;
@@ -574,11 +584,12 @@ with st.sidebar:
         value=datetime(2017, 7, 15).date(),
     )
 
-    hour = st.slider(
+    hour = st.number_input(
         "Hour of day",
-        0,
-        23,
-        17,
+        min_value=0,
+        max_value=23,
+        value=17,
+        step=1,
     )
 
     site = st.selectbox(
@@ -599,59 +610,66 @@ with st.sidebar:
 
     st.markdown("### Weather")
 
-    weather_tavg = st.slider(
+    weather_tavg = st.number_input(
         "Average temperature (°C)",
-        -10.0,
-        35.0,
-        16.0,
-        0.5,
+        min_value=-10.0,
+        max_value=35.0,
+        value=16.0,
+        step=0.5,
+        format="%.1f",
     )
 
-    weather_tmin = st.slider(
+    weather_tmin = st.number_input(
         "Minimum temperature (°C)",
-        -15.0,
-        30.0,
-        11.0,
-        0.5,
+        min_value=-15.0,
+        max_value=30.0,
+        value=11.0,
+        step=0.5,
+        format="%.1f",
     )
 
-    weather_tmax = st.slider(
+    weather_tmax = st.number_input(
         "Maximum temperature (°C)",
-        -5.0,
-        42.0,
-        21.0,
-        0.5,
+        min_value=-5.0,
+        max_value=42.0,
+        value=21.0,
+        step=0.5,
+        format="%.1f",
     )
 
-    weather_prcp = st.slider(
+    weather_prcp = st.number_input(
         "Precipitation (mm)",
-        0.0,
-        60.0,
-        1.0,
-        0.5,
+        min_value=0.0,
+        max_value=60.0,
+        value=1.0,
+        step=0.5,
+        format="%.1f",
     )
 
-    weather_wspd = st.slider(
+    weather_wspd = st.number_input(
         "Wind speed (km/h)",
-        0.0,
-        80.0,
-        14.0,
-        0.5,
+        min_value=0.0,
+        max_value=80.0,
+        value=14.0,
+        step=0.5,
+        format="%.1f",
     )
 
-    weather_pres = st.slider(
+    weather_pres = st.number_input(
         "Pressure (hPa)",
-        950.0,
-        1050.0,
-        1014.0,
-        1.0,
+        min_value=950.0,
+        max_value=1050.0,
+        value=1014.0,
+        step=1.0,
+        format="%.0f",
     )
 
-    weather_wdir = st.slider(
+    weather_wdir = st.number_input(
         "Wind direction (°)",
-        0,
-        360,
-        220,
+        min_value=0,
+        max_value=360,
+        value=220,
+        step=1,
     )
 
     with st.expander(
@@ -718,12 +736,13 @@ with st.sidebar:
             step=0.5,
         )
 
-        bike_hum = st.slider(
+        bike_hum = st.number_input(
             "Bike humidity",
-            0.0,
-            100.0,
-            68.0,
-            1.0,
+            min_value=0.0,
+            max_value=100.0,
+            value=68.0,
+            step=1.0,
+            format="%.0f",
         )
 
         bike_wind_speed = st.number_input(
