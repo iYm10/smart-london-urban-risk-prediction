@@ -52,8 +52,27 @@ st.markdown(
         background: linear-gradient(180deg, #F8FBFD 0%, #EEF5F8 100%);
     }
 
-    #MainMenu, footer, header {
+    /* Keep Streamlit header visible because it contains
+       the sidebar open/close control. Hide only menu and footer. */
+    #MainMenu,
+    footer {
         visibility: hidden;
+    }
+
+    header[data-testid="stHeader"] {
+        visibility: visible !important;
+        background: transparent !important;
+    }
+
+    /* Ensure the sidebar toggle button always stays visible. */
+    button[data-testid="stSidebarCollapsedControl"],
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="collapsedControl"] {
+        visibility: visible !important;
+        display: flex !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        z-index: 999999 !important;
     }
 
     .block-container {
