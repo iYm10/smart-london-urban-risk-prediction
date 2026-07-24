@@ -65,10 +65,36 @@ st.markdown(
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, var(--navy) 0%, #09243D 100%);
         border-right: 1px solid rgba(255,255,255,.08);
+        direction: ltr !important;
+    }
+
+    [data-testid="stSidebar"] > div,
+    [data-testid="stSidebar"] section,
+    [data-testid="stSidebar"] [data-testid="stSlider"],
+    [data-testid="stSidebar"] [data-baseweb="slider"] {
+        direction: ltr !important;
     }
 
     [data-testid="stSidebar"] * {
         color: #F4FBFF;
+    }
+
+    /* Keep the slider track, filled bar, thumb, and displayed value
+       in the same left-to-right coordinate system. */
+    [data-testid="stSidebar"] [data-testid="stSlider"] {
+        text-align: left !important;
+        unicode-bidi: isolate !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stSlider"] label,
+    [data-testid="stSidebar"] [data-testid="stSlider"] p,
+    [data-testid="stSidebar"] [data-testid="stSlider"] span {
+        direction: ltr !important;
+        unicode-bidi: isolate !important;
+    }
+
+    [data-testid="stSidebar"] [data-baseweb="slider"] > div {
+        direction: ltr !important;
     }
 
     [data-testid="stSidebar"] .stSlider label,
@@ -77,39 +103,6 @@ st.markdown(
     [data-testid="stSidebar"] .stDateInput label {
         color: #D7E8F2 !important;
         font-weight: 600;
-    }
-
-    /* Keep all numeric controls and slider tracks left-to-right.
-       This prevents Arabic/RTL browser settings from reversing the
-       slider thumb while the numeric value remains unchanged. */
-    [data-testid="stSidebar"] [data-testid="stSlider"],
-    [data-testid="stSidebar"] [data-testid="stSlider"] > div,
-    [data-testid="stSidebar"] [data-baseweb="slider"],
-    [data-testid="stSidebar"] [role="slider"],
-    [data-testid="stSidebar"] input[type="number"],
-    [data-testid="stSidebar"] input[type="text"] {
-        direction: ltr !important;
-        text-align: left !important;
-    }
-
-    [data-testid="stSidebar"] [data-baseweb="slider"] {
-        unicode-bidi: isolate !important;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stNumberInput"] {
-        direction: ltr !important;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stNumberInput"] input {
-        direction: ltr !important;
-        text-align: left !important;
-        font-variant-numeric: tabular-nums;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stSlider"] label {
-        direction: ltr !important;
-        text-align: left !important;
-        width: 100% !important;
     }
 
     .brand-wrap {
@@ -322,6 +315,35 @@ st.markdown(
         transform: translateY(-1px);
     }
     </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+
+# Force Streamlit's page direction to LTR so BaseWeb sliders calculate
+# the thumb and filled track from the same side.
+st.markdown(
+    """
+    <script>
+    const applyLTR = () => {
+        document.documentElement.setAttribute("dir", "ltr");
+        document.body.setAttribute("dir", "ltr");
+
+        const sidebar = document.querySelector(
+            '[data-testid="stSidebar"]'
+        );
+
+        if (sidebar) {
+            sidebar.setAttribute("dir", "ltr");
+            sidebar.style.direction = "ltr";
+        }
+    };
+
+    applyLTR();
+    setTimeout(applyLTR, 100);
+    setTimeout(applyLTR, 500);
+    </script>
     """,
     unsafe_allow_html=True,
 )
@@ -584,12 +606,11 @@ with st.sidebar:
         value=datetime(2017, 7, 15).date(),
     )
 
-    hour = st.number_input(
+    hour = st.slider(
         "Hour of day",
-        min_value=0,
-        max_value=23,
-        value=17,
-        step=1,
+        0,
+        23,
+        17,
     )
 
     site = st.selectbox(
@@ -610,66 +631,59 @@ with st.sidebar:
 
     st.markdown("### Weather")
 
-    weather_tavg = st.number_input(
+    weather_tavg = st.slider(
         "Average temperature (°C)",
-        min_value=-10.0,
-        max_value=35.0,
-        value=16.0,
-        step=0.5,
-        format="%.1f",
+        -10.0,
+        35.0,
+        16.0,
+        0.5,
     )
 
-    weather_tmin = st.number_input(
+    weather_tmin = st.slider(
         "Minimum temperature (°C)",
-        min_value=-15.0,
-        max_value=30.0,
-        value=11.0,
-        step=0.5,
-        format="%.1f",
+        -15.0,
+        30.0,
+        11.0,
+        0.5,
     )
 
-    weather_tmax = st.number_input(
+    weather_tmax = st.slider(
         "Maximum temperature (°C)",
-        min_value=-5.0,
-        max_value=42.0,
-        value=21.0,
-        step=0.5,
-        format="%.1f",
+        -5.0,
+        42.0,
+        21.0,
+        0.5,
     )
 
-    weather_prcp = st.number_input(
+    weather_prcp = st.slider(
         "Precipitation (mm)",
-        min_value=0.0,
-        max_value=60.0,
-        value=1.0,
-        step=0.5,
-        format="%.1f",
+        0.0,
+        60.0,
+        1.0,
+        0.5,
     )
 
-    weather_wspd = st.number_input(
+    weather_wspd = st.slider(
         "Wind speed (km/h)",
-        min_value=0.0,
-        max_value=80.0,
-        value=14.0,
-        step=0.5,
-        format="%.1f",
+        0.0,
+        80.0,
+        14.0,
+        0.5,
     )
 
-    weather_pres = st.number_input(
+    weather_pres = st.slider(
         "Pressure (hPa)",
-        min_value=950.0,
-        max_value=1050.0,
-        value=1014.0,
-        step=1.0,
-        format="%.0f",
+        950.0,
+        1050.0,
+        1014.0,
+        1.0,
     )
 
-    weather_wdir = st.number_input(
+    weather_wdir = st.slider(
         "Wind direction (°)",
-        min_value=0,
-        max_value=360,
-        value=220,
-        step=1,
+        0,
+        360,
+        220,
     )
 
     with st.expander(
@@ -736,13 +750,12 @@ with st.sidebar:
             step=0.5,
         )
 
-        bike_hum = st.number_input(
+        bike_hum = st.slider(
             "Bike humidity",
-            min_value=0.0,
-            max_value=100.0,
-            value=68.0,
-            step=1.0,
-            format="%.0f",
+            0.0,
+            100.0,
+            68.0,
+            1.0,
         )
 
         bike_wind_speed = st.number_input(
