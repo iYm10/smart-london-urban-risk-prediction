@@ -1,3 +1,4 @@
+import json
 import os
 from datetime import datetime
 from pathlib import Path
@@ -314,12 +315,17 @@ def load_xgboost_model():
 
     if not MODEL_NAME_PATH.exists():
         raise FileNotFoundError(
-            f"Model name file not found: {MODEL_NAME_PATH}"
+            f"Metadata file not found: {MODEL_NAME_PATH}"
         )
 
-    model_name = MODEL_NAME_PATH.read_text(
-        encoding="utf-8"
-    ).strip()
+    with open(
+        MODEL_NAME_PATH,
+        "r",
+        encoding="utf-8",
+    ) as file:
+        metadata = json.load(file)
+
+    model_name = metadata.get("model_name", "").strip()
 
     if model_name.lower() != "xgboost":
         raise ValueError(
@@ -327,22 +333,29 @@ def load_xgboost_model():
             f"Found model name: {model_name}"
         )
 
+    feature_columns = metadata.get("feature_columns", [])
+
+    if not feature_columns:
+        raise ValueError(
+            "No feature_columns were found in best_model_name.txt."
+        )
+
     model = XGBRegressor()
     model.load_model(str(MODEL_PATH))
 
-    feature_names = model.get_booster().feature_names
-
-    if not feature_names:
-        raise ValueError(
-            "Feature names were not stored inside best_model.json. "
-            "Retrain XGBoost using a pandas DataFrame, then save it again."
-        )
-
-    return model, model_name, feature_names
+    return model, metadata
 
 
 try:
-    model, model_name, training_features = load_xgboost_model()
+    model, metadata = load_xgboost_model()
+    model_name = metadata["model_name"]
+    training_features = metadata["feature_columns"]
+    feature_defaults = metadata.get("feature_defaults", {})
+    model_metrics = metadata.get("metrics", {})
+    risk_thresholds = metadata.get(
+        "risk_thresholds",
+        {"low_max": 0.0, "high_min": 5.0},
+    )
 except Exception as exc:
     st.error("The prediction model could not be loaded.")
     st.code(str(exc))
@@ -367,20 +380,17 @@ def season_from_month(month: int) -> str:
 
 
 def risk_profile(prediction: float):
-    """
-    Client-facing operational bands.
+    low_max = float(risk_thresholds.get("low_max", 0.0))
+    high_min = float(risk_thresholds.get("high_min", 5.0))
 
-    These are presentation bands and are not causal claims.
-    Adjust them later if you export data-driven thresholds.
-    """
-    if prediction < 0.50:
+    if prediction <= low_max:
         return (
             "Low",
             "risk-low",
             "Normal operating conditions. Continue routine monitoring."
         )
 
-    if prediction < 1.50:
+    if prediction < high_min:
         return (
             "Moderate",
             "risk-moderate",
@@ -463,26 +473,28 @@ def build_feature_frame(
     feature_names: list[str],
 ) -> pd.DataFrame:
     """
-    Build one row that exactly matches the XGBoost training columns.
-
-    Numeric columns are filled directly.
-    One-hot columns such as site_* and season_* are activated automatically.
-    Any unavailable feature remains zero.
+    Build one row using the exact defaults and training columns
+    saved inside best_model_name.txt.
     """
     model_row = {
-        feature: 0.0
+        feature: float(feature_defaults.get(feature, 0.0))
         for feature in feature_names
     }
 
+    for feature in feature_names:
+        if (
+            feature.startswith("site_")
+            or feature.startswith("season_")
+        ):
+            model_row[feature] = 0.0
+
     for key, value in raw_features.items():
-        # Direct numeric/training feature
         if key in model_row:
             try:
                 model_row[key] = float(value)
             except (TypeError, ValueError):
-                model_row[key] = value
+                pass
 
-        # One-hot encoded categorical feature
         dummy_feature = f"{key}_{value}"
 
         if dummy_feature in model_row:
@@ -493,12 +505,10 @@ def build_feature_frame(
         columns=feature_names,
     )
 
-    input_df = input_df.apply(
+    return input_df.apply(
         pd.to_numeric,
         errors="coerce",
     ).fillna(0.0)
-
-    return input_df
 
 
 def make_prediction(raw_features: dict) -> float:
@@ -873,17 +883,24 @@ with c3:
     )
 
 with c4:
+    r2_value = model_metrics.get("r2")
+    r2_display = (
+        f"{float(r2_value):.3f}"
+        if r2_value is not None
+        else "—"
+    )
+
     st.markdown(
         f"""
         <div class="card">
             <div class="metric-label">
-                Model features
+                Model R²
             </div>
             <div class="metric-value">
-                {len(training_features)}
+                {r2_display}
             </div>
             <div class="metric-note">
-                Training columns loaded from XGBoost
+                Held-out test performance
             </div>
         </div>
         """,
@@ -1131,6 +1148,9 @@ with st.expander(
         {
             "model": model_name,
             "feature_count": len(training_features),
+            "rmse": model_metrics.get("rmse"),
+            "mae": model_metrics.get("mae"),
+            "r2": model_metrics.get("r2"),
             "selected_site": site,
             "scenario_timestamp": (
                 f"{selected_date} {hour:02d}:00"
