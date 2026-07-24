@@ -79,6 +79,29 @@ st.markdown(
         font-weight: 600;
     }
 
+    /* Keep all numeric controls and slider tracks left-to-right.
+       This prevents Arabic/RTL browser settings from reversing the
+       slider thumb while the numeric value remains unchanged. */
+    [data-testid="stSidebar"] [data-testid="stSlider"],
+    [data-testid="stSidebar"] [data-testid="stSlider"] > div,
+    [data-testid="stSidebar"] [data-baseweb="slider"],
+    [data-testid="stSidebar"] [role="slider"],
+    [data-testid="stSidebar"] input[type="number"],
+    [data-testid="stSidebar"] input[type="text"] {
+        direction: ltr !important;
+        text-align: left !important;
+    }
+
+    [data-testid="stSidebar"] [data-baseweb="slider"] {
+        unicode-bidi: isolate !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stSlider"] label {
+        direction: ltr !important;
+        text-align: left !important;
+        width: 100% !important;
+    }
+
     .brand-wrap {
         padding: 8px 4px 22px;
     }
